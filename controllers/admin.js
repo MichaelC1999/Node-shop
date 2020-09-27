@@ -17,7 +17,7 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const userId = req.user._id;
   const description = req.body.description;
-  const product = new Product(title, imageUrl, price, description, userId)
+  const product = new Product(title, imageUrl, price, description, null, userId)
 
   
   product
@@ -38,6 +38,7 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
+  console.log(prodId)
     Product.findById(prodId)
   // Product.findById(prodId)
     .then(product => {
@@ -55,7 +56,8 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
-  const prodId = req.body.productId;
+  console.log(req.body._id)
+  const prodId = req.body._id;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
@@ -64,6 +66,8 @@ exports.postEditProduct = (req, res, next) => {
 
   const product = new Product(updatedTitle, updatedImageUrl, updatedPrice, updatedDesc, new ObjectId(prodId))
   
+  console.log(product)
+
   product
     .save()
     .then(result => {
@@ -88,7 +92,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
+  const prodId = req.body._id;
   console.log(prodId)
   Product.deleteById(prodId)
     .then(() => {
