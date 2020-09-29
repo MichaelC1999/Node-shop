@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 const Schema = mongoose.Schema;
 
-
 const userSchema = new Schema({
   name: {
     type: String,
@@ -18,14 +17,22 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Product',
         required: true
-      }, 
+      },
+      price: {
+        type: Number,
+        required: true
+      },
       quantity: {
         type: Number,
         required: true
-      }}]
+      }}],
+    cartTotal: {
+      type: Number,
+      required: true
+    }
   }
 })
-//fix add to cart, productId incorrectly passed?
+
 userSchema.methods.addToCart = function(product) {
   const cartProductIndex = this.cart.items.findIndex(cp => {
     return cp._id.toString() == product._id.toString();
@@ -37,28 +44,45 @@ userSchema.methods.addToCart = function(product) {
     updatedCartItems[cartProductIndex].quantity = newQuantity;
   } else {
     updatedCartItems.push({
-      _id: (product._id),
+      _id: product._id,
+      price: product.price,
       quantity: newQuantity
     });
   }
-  
+
+  let cartTotalCost = 0
+
   const updatedCart = {
-    items: updatedCartItems
+    items: updatedCartItems,
+    cartTotal: cartTotalCost
   }
-  this.cart = updatedCart;
+
+  this.cart = updatedCart
+  
+  for(item in this.cart.items){
+    cartTotalCost += this.cart.items[item].quantity * this.cart.items[item].price
+  }
+
+  this.cart.cartTotal = cartTotalCost;
+
   return this.save();
 }
 
 userSchema.methods.removeFromCart = function(productId) {
-  const updatedCartItems = this.cart.items.filter(item => {
-    return item._id.toString() !==productId.toString();
-  });
-  this.cart.items = updatedCartItems;
+  const productRemoveIndex = this.cart.items.findIndex(cp => {
+    return cp._id.toString() == productId.toString()
+  })
+
+  const amtToRemove = this.cart.items[productRemoveIndex].price * this.cart.items[productRemoveIndex].quantity
+
+  this.cart.items.splice(productRemoveIndex, 1)
+  this.cart.cartTotal = this.cart.cartTotal - amtToRemove
+
   return this.save();
 }
 
 userSchema.methods.clearCart = function() {
-  this.cart = {items: []};
+  this.cart = {items: [], cartTotal: 0};
   return this.save();
 }
 

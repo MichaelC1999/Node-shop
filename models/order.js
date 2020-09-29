@@ -24,7 +24,12 @@ const orderSchema = new Schema({
             type: Number,
             required: true
         }
-    }]
+    }],
+
+    totalCost: {
+        type: Number,
+        required: true
+    }
     
 })
 

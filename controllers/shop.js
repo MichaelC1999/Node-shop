@@ -48,12 +48,12 @@ exports.getCart = (req, res, next) => {
     .populate('cart.items._id')
     .execPopulate()
     .then(user => {
-      console.log(user.cart.items)
       const products = user.cart.items;
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
-        products: products
+        products: products,
+        totalCost: user.cart.cartTotal
       });
     })
 
@@ -90,7 +90,6 @@ exports.postOrder = (req, res, next) => {
   .populate('cart.items._id')
   .execPopulate()
   .then(user => {
-    console.log(user.cart.items)
     const products = user.cart.items.map(i=> {
       return {quantity: i.quantity, product: {...i._id._doc}}
     });
@@ -99,7 +98,8 @@ exports.postOrder = (req, res, next) => {
         name: req.user.name,
         userId: req.user
       },
-      products: products
+      products: products,
+      totalCost: user.cart.cartTotal
     })
     order.save();
   })
