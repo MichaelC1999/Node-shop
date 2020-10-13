@@ -1,87 +1,164 @@
 const Product = require('../models/product');
 const mongodb = require('mongodb');
+const { validationResult } = require('express-validator/check')
+const fileHelper = require('../util/file');
 
-const ObjectId = mongodb.ObjectId;
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
-    editing: false
+    editing: false,
+    hasError: false,
+    errorMessage: null
+
   });
 };
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    description: description,
-    userId: req.user._id
-  })
 
+  if(!image){
+    return res.status(422).render('admin/edit-product', {
+      path: '/admin/add-product',
+      pageTitle: 'Add product',
+      editing: false,
+      hasError: true,
+      product: {
+        title: title, 
+        price: price,
+        description: description
+      },
+      errorMessage: 'Image file must be uploaded'
+    });
+  }
+
+
+
+  const errors = validationResult(req)
+    if(!errors.isEmpty()) {
+        console.log(errors.array())
+        return res
+            .status(422)
+            .render('admin/edit-product', {
+            path: '/admin/add-product',
+            pageTitle: 'Add product',
+            editing: false,
+            hasError: true,
+            product: {
+              title: title, 
+              price: price,
+              description: description
+            },
+            errorMessage: errors.array()[0].msg
+          });
+    }
+
+    const imageUrl = image.path;
   
+    const product = new Product({
+      title: title,
+      imageUrl: imageUrl,
+      price: price,
+      description: description,
+      userId: req.user._id
+    })
+
   product
     .save()  
     .then(result => {
-        // console.log(result);
-        console.log('Created Product');
         res.redirect('/admin/products');
       })
       .catch(err => {
-        console.log(err);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       });
 };
 
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
   if (!editMode) {
-    return res.redirect('/');
+    throw new Error('Not in edit mode')
   }
   const prodId = req.params.productId;
-  console.log(prodId)
     Product.findById(prodId)
-  // Product.findById(prodId)
     .then(product => {
       if (!product) {
-        return res.redirect('/');
+        throw new Error('No product found')
       }
       res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product: product
+        hasError: false,
+        product: product,
+        errorMessage: null
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
-  console.log(req.body._id)
   const prodId = req.body._id;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const image = req.file;
   const updatedDesc = req.body.description;
 
 
-  Product.findById(prodId).then(product=> {
-    product.title = updatedTitle;
-    product.imageUrl = updatedImageUrl;
-    product.price = updatedPrice;
-    product.description = updatedDesc;
-    
-    return product.save()
+  const errors = validationResult(req)
+    if(!errors.isEmpty()) {
+        console.log(errors.array())
+        return res
+            .status(422)
+            .render('admin/edit-product', {
+            path: '/edit-product',
+            pageTitle: 'Edit product',
+            editing: true,
+            hasError: true,
+            product: {
+              title: updatedTitle, 
+              price: updatedPrice,
+              description: updatedDesc
+            },
+            errorMessage: errors.array()[0].msg
+          });
+    }
+
+  Product.findById(prodId)
+    .then(product=> {
+
+      if(!product){
+        throw new Error('No product found')
+      }
+
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      
+      if(image) {
+        fileHelper.deleteFile(product.imageUrl);
+        product.imageUrl = image.path
+      }
+
+      return product.save()
   })
   .then(result => {
-    console.log('UPDATED PRODUCT!');
     res.redirect('/admin/products');
   })
-  .catch(err => console.log(err));
+  .catch(err => {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  });
 };
 
 exports.getProducts = (req, res, next) => {
@@ -91,20 +168,38 @@ exports.getProducts = (req, res, next) => {
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
-        path: '/admin/products'
-      });
+        path: '/admin/products',
+          });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body._id;
-  console.log(prodId)
-  //could also use findByIdAndRemove
-  Product.findByIdAndDelete(prodId)
-    .then(() => {
-      console.log('DESTROYED PRODUCT');
-      res.redirect('/admin/products');
+exports.deleteProduct = (req, res, next) => {
+  const prodId = req.params.productId;
+  Product.findById(prodId)
+    .then(product => {
+      if(!product){
+        throw new Error('No product found')
+      }
+      
+      fileHelper.deleteFile(product.imageUrl);
+      return Product
+        .findByIdAndDelete(prodId)
+        .then(result => {
+          
+          res.status(200).json({
+            message: 'Success!'
+          })
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        })
     })
-    .catch(err => console.log(err));
+    
 };
