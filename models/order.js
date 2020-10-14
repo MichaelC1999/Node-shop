@@ -9,12 +9,11 @@ const orderSchema = new Schema({
             ref: 'User',
             required: true
         },  
-        name: {
+        email: {
             type: String,
             required: true
         }
     },
-    
     products: [{
         product: {
             type: Object,
@@ -25,14 +24,11 @@ const orderSchema = new Schema({
             required: true
         }
     }],
-
     totalCost: {
         type: Number,
         required: true
     }
     
 })
-
-
 
 module.exports = mongoose.model('Order', orderSchema);

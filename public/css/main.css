@@ -4,6 +4,8 @@
   box-sizing: border-box;
 }
 
+
+
 body {
   padding: 0;
   margin: 0;
@@ -42,8 +44,10 @@ form {
 
 .main-header__nav {
   height: 100%;
-  display: none;
+  width: 100%;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .main-header__item-list {
@@ -56,11 +60,17 @@ form {
 .main-header__item {
   margin: 0 1rem;
   padding: 0;
+  
 }
 
-.main-header__item a {
+.main-header__item a,
+.main-header__item button {
   text-decoration: none;
   color: white;
+  font: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .main-header__item a:hover,
@@ -216,7 +226,35 @@ form {
   color: white;
 }
 
-@media (min-width: 768px) {
+.errorMessage {
+  font-size: 20px;
+  width: 100%;
+  color: rgb(211, 0, 0);
+  border: 1px rgb(211, 0, 0) solid;
+  background-color: rgba(226, 133, 122, 0.781);
+  text-align: center;
+}
+
+.pagination {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.pagination a {
+  text-decoration: none;
+  color: teal;
+  padding: 0.5rem;
+  border: teal solid 1px;
+  margin: 0 1rem;
+}
+
+.pagination a:hover,
+.pagination a.active {
+  background-color: teal;
+  color: white;
+}
+
+@media (min-width: 668px) {
   .main-header__nav {
     display: flex;
   }
