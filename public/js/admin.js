@@ -1,18 +1,20 @@
-const deleteProduct = (btn) => {
-    const prodId = (btn.parentNode.querySelector('[name=_id]').value)
-    const csrf = (btn.parentNode.querySelector('[name=_csrf]').value)
+document.getElementById("deleteBtn").addEventListener("submit", deleteProduct)
 
-    const prodElement = btn.closest('article')
 
+function deleteProduct(req, res, next){
+    event.preventDefault()
+    console.log(req)
+    const prodId = req.target[1].value
+    const csrf = req.target[2].value
+
+    console.log('function entered')
     fetch('/admin/product/' + prodId, {
         method: 'DELETE',
         headers: {
             'csrf-token' : csrf
         }
     }).then(result => {
-        return result.json();
-    }).then(data => {
-        prodElement.parentNode.removeChild(prodElement)
+        location.reload()
     }).catch(err => {
         console.log(err)
     })

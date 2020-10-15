@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const mongodb = require('mongodb');
 const { validationResult } = require('express-validator/check')
 const fileHelper = require('../util/file');
 
@@ -180,11 +179,13 @@ exports.getProducts = (req, res, next) => {
 
 exports.deleteProduct = (req, res, next) => {
   const prodId = req.params.productId;
+  console.log('delete product function')
   Product.findById(prodId)
     .then(product => {
       if(!product){
         throw new Error('No product found')
       }
+      console.log('then block entered')
       
       fileHelper.deleteFile(product.imageUrl);
       return Product
@@ -195,6 +196,7 @@ exports.deleteProduct = (req, res, next) => {
             message: 'Success!'
           })
         })
+       
         .catch(err => {
           const error = new Error(err);
           error.httpStatusCode = 500;
