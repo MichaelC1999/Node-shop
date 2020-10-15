@@ -30,15 +30,11 @@
                                     <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
                                     <input type="hidden" value="<%= product._id %>" name="_id">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-<<<<<<< HEAD
                                     <form id="deleteBtn">
                                         <button class="btn" type="submit">Delete</button>
                                         <input type="hidden" value="<%= product._id %>" name="_id">
                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     </form>
-=======
-                                    <button class="btn" onclick="deleteProduct(this)" type="button">Delete</button>
->>>>>>> b8bd61b738990b5be3bbbfeceb9653569c272d35
                                     
 
                                 </div>
