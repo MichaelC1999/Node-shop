@@ -5,7 +5,7 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 3;
 
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
