@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "MONGO_USER=cm172596 MONGO_PASSWORD=XboxMike32 MONGO_DEFAULT_DATABASE=shop node app.js",
+    "start": "MONGO_USER=cm172596 MONGO_PASSWORD=XboxMike32 MONGO_DEFAULT_DATABASE=shop CLOUDINARY_NAME=dxtwbkjbd CLOUDINARY_API_KEY=348647821589844 CLOUDINARY_API_SECRET=bUiB1doZ6_GKdASRoL-Qg8jkbdM node app.js",
     "start-server": "node app.js"
   },
   "author": "Michael Carroll",
@@ -19,6 +19,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "cloudinary": "^1.23.0",
     "compression": "^1.7.4",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^2.4.1",

@@ -1,6 +1,8 @@
 const Product = require('../models/product');
 const { validationResult } = require('express-validator/check')
 const fileHelper = require('../util/file');
+const fs = require('fs')
+const {cloudinary} = require('../util/cloudinary');
 
 
 exports.getAddProduct = (req, res, next) => {
@@ -14,7 +16,7 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-exports.postAddProduct = (req, res, next) => {
+exports.postAddProduct = async (req, res, next) => {
   const title = req.body.title;
   const image = req.file;
   const price = req.body.price;
@@ -35,7 +37,20 @@ exports.postAddProduct = (req, res, next) => {
     });
   }
 
+  let imagePath = ""
 
+  try {
+    const imageAsBase64 = fs.readFileSync(image.path, 'base64');
+    const uploadedResponse = await cloudinary.uploader.upload(image.path, {
+      upload_preset: 'dev_setups'
+    })
+    console.log(uploadedResponse)
+    imagePath = uploadedResponse.url
+  } catch(err) {
+    console.log(err)
+  }
+
+  console.log('after respnse?', imagePath)
 
   const errors = validationResult(req)
     if(!errors.isEmpty()) {
@@ -56,11 +71,12 @@ exports.postAddProduct = (req, res, next) => {
           });
     }
 
-    const imageUrl = image.path;
+    //const imageUrl = image.path;
+
   
     const product = new Product({
       title: title,
-      imageUrl: imageUrl,
+      imageUrl: imagePath,
       price: price,
       description: description,
       userId: req.user._id

@@ -19,3 +19,7 @@ function deleteProduct(req, res, next){
         console.log(err)
     })
 }
+
+//On submit, it already gets pushed to a route. in postAdd and postEdit controller, handle as if it was just requested in a route.
+//use async await to upload the image to the database, then use the response url to serve image
+//let program read image from folder, but if image source from location is not found, load from cloudinary
