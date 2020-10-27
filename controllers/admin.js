@@ -1,7 +1,5 @@
 const Product = require('../models/product');
 const { validationResult } = require('express-validator/check')
-const fileHelper = require('../util/file');
-const fs = require('fs')
 const {cloudinary} = require('../util/cloudinary');
 
 
@@ -40,17 +38,14 @@ exports.postAddProduct = async (req, res, next) => {
   let imagePath = ""
 
   try {
-    const imageAsBase64 = fs.readFileSync(image.path, 'base64');
     const uploadedResponse = await cloudinary.uploader.upload(image.path, {
       upload_preset: 'dev_setups'
     })
-    console.log(uploadedResponse)
     imagePath = uploadedResponse.url
   } catch(err) {
     console.log(err)
   }
 
-  console.log('after respnse?', imagePath)
 
   const errors = validationResult(req)
     if(!errors.isEmpty()) {
@@ -71,7 +66,6 @@ exports.postAddProduct = async (req, res, next) => {
           });
     }
 
-    //const imageUrl = image.path;
 
   
     const product = new Product({
@@ -121,7 +115,7 @@ exports.getEditProduct = (req, res, next) => {
     });
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body._id;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
@@ -148,6 +142,18 @@ exports.postEditProduct = (req, res, next) => {
           });
     }
 
+    let imagePath = ""
+
+    try {
+      const uploadedResponse = await cloudinary.uploader.upload(image.path, {
+        upload_preset: 'dev_setups'
+      })
+      console.log(uploadedResponse)
+      imagePath = uploadedResponse.url
+    } catch(err) {
+      console.log(err)
+    }
+
   Product.findById(prodId)
     .then(product=> {
 
@@ -155,15 +161,12 @@ exports.postEditProduct = (req, res, next) => {
         throw new Error('No product found')
       }
 
+      product.imageUrl = imagePath
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
-      
-      if(image) {
-        fileHelper.deleteFile(product.imageUrl);
-        product.imageUrl = image.path
-      }
 
+      
       return product.save()
   })
   .then(result => {
@@ -193,28 +196,3 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.deleteProduct = (req, res, next) => {
-  const prodId = req.params.productId;
-  Product.findById(prodId)
-    .then(product => {
-      if(!product){
-        throw new Error('No product found')
-      }
-      
-      fileHelper.deleteFile(product.imageUrl);
-      return Product
-        .findByIdAndDelete(prodId)
-        .then(result => {
-          
-          res.status(200).json({
-            message: 'Success!'
-          })
-        })
-        .catch(err => {
-          const error = new Error(err);
-          error.httpStatusCode = 500;
-          return next(error);
-        })
-    })
-    
-};

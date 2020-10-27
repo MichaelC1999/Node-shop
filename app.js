@@ -1,5 +1,4 @@
 const path = require('path');
-const fs = require('fs')
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -56,7 +55,6 @@ app.use(compression())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'))
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(
   session({
@@ -66,6 +64,11 @@ app.use(
     store: store
   })
 )
+
+app.use(function(req, res, next) {
+  res.setHeader("content-security-policy", "default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'; frame-src *;")
+  next();
+});
 
 app.use(csrfProtection);
 app.use(flash());
