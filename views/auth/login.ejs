@@ -11,7 +11,7 @@
         <% if (errorMessage) { %>
         <div class="errorMessage"> <%= errorMessage %></div>
         <% } %>
-        <form class="login-form" action="/login" method="POST">
+        <form class="login-form" style="text-align: center;" action="/login" method="POST">
             <div class="form-control">
                 <label for="email">Email</label>
                 <input type="text" name="email" id="email" value="<%= oldInput.email %>">
@@ -22,9 +22,12 @@
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn" type="submit">Login</button>
+                    
+            
         </form>
-        <div class="centered">        
-            <a href="/reset">Reset Password</a>
+        <div class="centered" style="margin-top: 16px;">        
+            <a class="btn" href="/reset">Reset Password</a>
         </div>
+
     </main>
 <%- include('../includes/end.ejs') %>
