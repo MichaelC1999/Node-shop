@@ -5,10 +5,12 @@ const User = require("../models/user");
 const crypto = require('crypto')
 const { validationResult } = require('express-validator/check')
 
+// auth: {
+//         api_key: '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'
+//     }
+
 const transporter = nodemailer.createTransport(sendgridTransport({
-    auth: {
-        api_key: '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'
-    }
+    placeholder...
 }))
 
 exports.getLogin = (req, res, next) => {
